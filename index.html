@@ -8,211 +8,214 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <style>
         :root {
+            --deep-purple: #1a0b2e;
             --gold: #FFD700;
-            --dark: #1a1a1a;
             --magenta: #d946ef;
             --green: #2ecc71;
+            --white: #ffffff;
         }
 
         body { 
-            margin: 0; padding: 0; overflow: hidden; 
-            background: radial-gradient(circle, #2c3e50 0%, #000 100%); 
-            font-family: 'Segoe UI', sans-serif; color: white; 
-            height: 100vh; display: flex; flex-direction: column; align-items: center;
+            margin: 0; padding: 0; 
+            background: radial-gradient(circle, #462c7a 0%, #1a0b2e 100%); 
+            font-family: 'Segoe UI', sans-serif; color: var(--white); 
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Logo y Header */
-        .header { height: 80px; display: flex; align-items: center; padding: 10px; z-index: 10; }
-        .header img { max-width: 180px; max-height: 60px; object-fit: contain; }
-
-        /* Pantalla de Inicio */
-        #pantalla-inicio { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
-            z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            text-align: center; padding: 20px;
+        /* Logo Superior */
+        .header-logo {
+            width: 100%;
+            height: 90px;
+            display: flex; justify-content: center; align-items: center;
+            padding: 10px 0;
+            z-index: 10;
+        }
+        .header-logo img {
+            max-width: 200px;
+            max-height: 70px;
+            object-fit: contain;
         }
 
-        /* Juego */
+        /* Selector de Tarjetas */
+        #selector-tarjetas {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; flex-grow: 1; padding-bottom: 50px;
+        }
+        .contenedor-opciones {
+            display: flex; gap: 12px; margin-top: 20px;
+        }
+        .tapa-preview {
+            width: 90px; height: 180px; /* Proporción 400x800 */
+            border: 3px solid var(--white); border-radius: 12px;
+            cursor: pointer; transition: transform 0.2s;
+            object-fit: cover;
+        }
+        .tapa-preview:active { transform: scale(0.95); }
+
+        /* Contenedor del Juego */
         #contenedor-juego { 
-            position: relative; margin-top: 20px; display: flex; flex-direction: column; align-items: center;
+            display: none; flex-direction: column; align-items: center; padding-bottom: 30px;
         }
         
         canvas { 
-            border: 6px solid white; border-radius: 20px; 
+            border: 5px solid var(--white); border-radius: 20px; 
             background: #fff; touch-action: none; 
-            box-shadow: 0 0 25px rgba(255,215,0,0.3);
-            cursor: crosshair;
+            width: 280px; height: 560px; /* Escalado visual del 400x800 */
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .instruccion { margin: 15px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); }
-
-        /* Botones */
-        .boton { 
-            background: var(--gold); color: #000; border: none; padding: 15px 40px; 
-            border-radius: 30px; font-weight: 800; font-size: 16px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255,215,0,0.4); text-transform: uppercase;
+        .btn-action {
+            background: linear-gradient(135deg, var(--magenta), #8e54e9);
+            color: white; border: none; padding: 16px 35px; border-radius: 30px;
+            font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 20px;
+            text-transform: uppercase; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.4);
         }
 
-        #btn-reclamar { background: var(--green); color: white; display: none; margin-top: 20px; animation: bounce 2s infinite; }
-
-        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
-        /* Registro y Modales */
+        /* Modales y Registro */
         .overlay { 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); 
-            z-index: 2500; flex-direction: column; justify-content: center; align-items: center; 
+            display: none; position: fixed; inset: 0; background: rgba(26, 11, 46, 0.98); 
+            z-index: 1000; flex-direction: column; justify-content: center; align-items: center; 
         }
-
-        .caja { 
-            background: #fff; padding: 25px; border-radius: 25px; 
-            width: 85%; max-width: 320px; text-align: center; color: #333; 
+        .caja-blanca { 
+            background: white; color: #333; padding: 30px; border-radius: 25px; 
+            width: 85%; max-width: 320px; text-align: center;
         }
-        .caja input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
-
-        /* Privacidad */
-        .privacidad-link { color: var(--magenta); font-size: 12px; text-decoration: none; margin-top: 10px; display: block; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div id="pantalla-inicio">
-        <div class="header"><img src="logo-cliente.webp" alt="Logo"></div>
-        <h1 style="color: var(--gold);">¡RASCA Y GANA!</h1>
-        <p>Descubre tu premio deslizando tu dedo sobre el boleto</p>
-        <button class="boton" onclick="iniciarJuego()">PROBAR SUERTE</button>
+    <div class="header-logo">
+        <img src="logo-cliente.webp" alt="Artem Logo">
     </div>
 
-    <div class="header">
-        <img src="logo-cliente.webp" alt="Logo">
-    </div>
-
-    <div id="contenedor-juego">
-        <div class="instruccion" id="main-msg">¡Rasca el área blanca!</div>
-        <canvas id="lienzo-rascar" width="300" height="350"></canvas>
-        <button id="btn-reclamar" class="boton" onclick="mostrarRegistro()">RECLAMAR PREMIO</button>
-    </div>
-
-    <div id="modal-registro" class="overlay">
-        <div class="caja">
-            <h2 id="ganaste-txt" style="margin: 0; color: #2c3e50;">¡FELICIDADES!</h2>
-            <p id="texto-premio" style="color:#d35400; font-weight:bold; font-size: 1.2rem;"></p>
-            <input type="text" id="nombre" placeholder="Nombre completo">
-            <input type="tel" id="telefono" placeholder="WhatsApp (10 dígitos)">
-            
-            <div style="font-size: 11px; margin: 10px 0; display: flex; align-items: flex-start; text-align: left; gap: 5px;">
-                <input type="checkbox" id="aviso">
-                <span>Acepto <a href="#" onclick="togglePriv(true)" style="color: var(--magenta);">política de privacidad</a></span>
-            </div>
-
-            <button class="boton" style="background:var(--green); color:#fff; width:100%;" onclick="finalizar()">ENVIAR POR WHATSAPP</button>
+    <div id="selector-tarjetas">
+        <h2 style="color: var(--gold); text-shadow: 0 2px 4px rgba(0,0,0,0.5);">¡ELIGE TU TARJETA!</h2>
+        <p>Toca una para empezar a rascar</p>
+        <div class="contenedor-opciones">
+            <img src="tapa1.webp" class="tapa-preview" onclick="iniciarRasca(1)">
+            <img src="tapa2.webp" class="tapa-preview" onclick="iniciarRasca(2)">
+            <img src="tapa3.webp" class="tapa-preview" onclick="iniciarRasca(3)">
         </div>
     </div>
 
-    <div id="modal-priv" class="overlay" style="z-index: 3000;">
-        <div class="caja" style="text-align: left; max-height: 60vh; overflow-y: auto;">
-            <h3>Aviso de Privacidad</h3>
-            <p style="font-size: 13px;">Los datos proporcionados serán usados exclusivamente por <b>Artem</b> para validar el canje del premio. No se almacenan en servidores externos y se envían directo al comercio vía WhatsApp.</p>
-            <button class="boton" style="width:100%;" onclick="togglePriv(false)">ENTENDIDO</button>
+    <div id="contenedor-juego">
+        <p style="font-weight: bold; color: var(--gold); margin-bottom: 10px;">DESCUBRE TU PREMIO ABAJO 👇</p>
+        <canvas id="lienzo-rascar" width="400" height="800"></canvas>
+        <button id="btn-reclamar" class="btn-action" style="display:none; background: var(--green);" onclick="abrirRegistro()">RECLAMAR PREMIO</button>
+    </div>
+
+    <div id="modal-registro" class="overlay">
+        <div class="caja-blanca">
+            <h2 style="margin:0; color: #1a0b2e;">¡FELICIDADES!</h2>
+            <p id="txt-premio-ganado" style="font-weight: 900; color: #d35400; font-size: 1.3rem; margin: 15px 0;"></p>
+            <input type="text" id="nombre" placeholder="Nombre completo">
+            <input type="tel" id="whatsapp" placeholder="WhatsApp (10 dígitos)">
+            
+            <div style="font-size: 12px; margin: 15px 0; display: flex; align-items: flex-start; gap: 8px; text-align: left;">
+                <input type="checkbox" id="aviso"> 
+                <label for="aviso">Acepto el <a href="javascript:void(0)" onclick="togglePriv(true)" style="color: var(--magenta);">aviso de privacidad</a>.</label>
+            </div>
+            
+            <button class="btn-action" style="width:100%;" onclick="enviarReclamo()">CANJEAR PREMIO</button>
+        </div>
+    </div>
+
+    <div id="modal-priv" class="overlay" style="z-index: 2000;">
+        <div class="caja-blanca" style="text-align: left;">
+            <h3 style="margin-top:0;">Aviso de Privacidad</h3>
+            <p style="font-size: 14px; line-height: 1.4;">Los datos recabados por <b>Artem</b> (Nombre y WhatsApp) se utilizarán solo para la entrega del premio ganado en esta dinámica. No se almacenan datos en servidores externos.</p>
+            <button class="btn-action" style="width:100%;" onclick="togglePriv(false)">CERRAR</button>
         </div>
     </div>
 
     <script>
-        const listaPremios = [
-            "10% DE DESCUENTO",
-            "50% EN ETIQUETA AMARILLA",
-            "30% EN TODA LA TIENDA",
-            "UN REGALO SORPRESA"
-        ];
-
-        let idPremioAzar = Math.floor(Math.random() * listaPremios.length);
-        const lienzo = document.getElementById('lienzo-rascar');
-        const ctx = lienzo.getContext('2d');
-        let rascadoCompletado = false;
-
-        function iniciarJuego() {
-            document.getElementById('pantalla-inicio').style.display = 'none';
-            prepararLienzo();
+        // SEGURIDAD: Solo abre con ?acceso=valido
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('acceso') !== 'valido') {
+            document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>⚠️ Acceso Restringido</h2><p>Escanea el código QR en tienda para participar.</p></div>";
         }
 
-        function prepararLienzo() {
-            // Fondo (El premio que se descubrirá)
-            // IMPORTANTE: Aquí puedes poner una imagen de fondo o solo texto
-            lienzo.style.backgroundColor = "#fff";
-            lienzo.style.backgroundImage = "url('assets/fondo-ticket.webp')"; // Opcional
-            lienzo.style.backgroundSize = "cover";
+        const premiosInfo = {
+            1: "10% DE DESCUENTO ETIQUETA ROJA",
+            2: "50% DE DESCUENTO ETIQUETA AMARILLA",
+            3: "30% DE DESCUENTO TODA LA TIENDA"
+        };
 
-            // Capa superior (Lo que se rasca)
-            ctx.fillStyle = "#CECECE";
-            ctx.fillRect(0, 0, 300, 350);
-            
-            // Añadir patrón de puntos o texto al "rasca"
-            ctx.fillStyle = "#999";
-            ctx.font = "bold 20px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("RASCA AQUÍ", 150, 180);
+        let premioId = 0;
+        const canvas = document.getElementById('lienzo-rascar');
+        const ctx = canvas.getContext('2d');
+        let rascadoListo = false;
+
+        function iniciarRasca(idTapa) {
+            premioId = Math.floor(Math.random() * 3) + 1; // Selección al azar del premio
+            document.getElementById('selector-tarjetas').style.display = 'none';
+            document.getElementById('contenedor-juego').style.display = 'flex';
+
+            // 1. Poner la imagen del premio al fondo del canvas
+            canvas.style.backgroundImage = `url('premio${premioId}.webp')`;
+            canvas.style.backgroundSize = "100% 100%";
+
+            // 2. Dibujar la tapa seleccionada encima
+            const imgTapa = new Image();
+            imgTapa.src = `tapa${idTapa}.webp`;
+            imgTapa.onload = () => {
+                ctx.drawImage(imgTapa, 0, 0, 400, 800);
+            };
         }
 
         function rascar(e) {
             e.preventDefault();
-            const rect = lienzo.getBoundingClientRect();
+            const rect = canvas.getBoundingClientRect();
             const touch = e.touches ? e.touches[0] : e;
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
+            
+            // Ajuste de coordenadas escala 400x800
+            const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
 
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath();
-            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.arc(x, y, 35, 0, Math.PI * 2);
             ctx.fill();
 
-            verificarRascado();
+            validarProgreso();
         }
 
-        function verificarRascado() {
-            if (rascadoCompletado) return;
-            
-            // Verificamos un punto central para activar el botón
-            const data = ctx.getImageData(150, 200, 1, 1).data;
-            if (data[3] === 0) { // Si el pixel es transparente
-                rascadoCompletado = true;
+        function validarProgreso() {
+            if(rascadoListo) return;
+            // Validamos un punto central (400x800 -> 200, 400)
+            const data = ctx.getImageData(200, 400, 1, 1).data;
+            if(data[3] === 0) {
+                rascadoListo = true;
                 document.getElementById('btn-reclamar').style.display = 'block';
-                document.getElementById('main-msg').innerText = "¡PREMIO DESCUBIERTO!";
-                
-                // Dibujar el nombre del premio en el canvas ya descubierto
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = "#d35400";
-                ctx.font = "bold 22px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText(listaPremios[idPremioAzar], 150, 200);
             }
         }
 
-        lienzo.addEventListener('touchmove', rascar);
-        lienzo.addEventListener('mousemove', (e) => { if(e.buttons === 1) rascar(e); });
+        canvas.addEventListener('touchmove', rascar);
+        canvas.addEventListener('mousemove', (e) => { if(e.buttons === 1) rascar(e); });
 
-        function mostrarRegistro() {
-            document.getElementById('texto-premio').innerText = listaPremios[idPremioAzar];
+        function abrirRegistro() {
+            document.getElementById('txt-premio-ganado').innerText = premiosInfo[premioId];
             document.getElementById('modal-registro').style.display = 'flex';
         }
 
-        function togglePriv(ver) {
-            document.getElementById('modal-priv').style.display = ver ? 'flex' : 'none';
+        function togglePriv(val) {
+            document.getElementById('modal-priv').style.display = val ? 'flex' : 'none';
         }
 
-        function finalizar() {
+        function enviarReclamo() {
             const nom = document.getElementById('nombre').value;
-            const tel = document.getElementById('telefono').value;
+            const tel = document.getElementById('whatsapp').value;
             const aviso = document.getElementById('aviso').checked;
-            const folio = Math.floor(Math.random() * 9000) + 1000;
 
-            if(!nom || tel.length < 10 || !aviso) return alert("Completa tus datos y acepta la privacidad.");
+            if(!nom || tel.length < 10 || !aviso) {
+                alert("Por favor completa los datos y acepta la privacidad.");
+                return;
+            }
 
-            const mensaje = encodeURIComponent(`*RASCA Y GANA - ARTEM*\nFolio: #RS-${folio}\nPremio: ${listaPremios[idPremioAzar]}\nNombre: ${nom}\nTel: ${tel}`);
+            const mensaje = encodeURIComponent(`*ARTEM - RASCA Y GANA*\n\n🏆 PREMIO: ${premiosInfo[premioId]}\n👤 CLIENTE: ${nom}\n📱 TEL: ${tel}\n\nCanje solicitado desde el sitio web.`);
             window.location.href = `https://wa.me/5215542492026?text=${mensaje}`;
         }
     </script>
