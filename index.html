@@ -21,7 +21,10 @@
             margin: 0; padding: 0; 
             background: radial-gradient(circle, #462c7a 0%, #1a0b2e 100%); 
             font-family: 'Segoe UI', sans-serif; color: var(--white); 
-            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; 
+            display: flex; flex-direction: column; align-items: center;
+            overflow-y: auto; /* Permite scroll si el canvas es muy alto */
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Logo Superior */
@@ -30,50 +33,54 @@
             height: 90px;
             display: flex; justify-content: center; align-items: center;
             padding: 10px 0;
-            z-index: 10;
+            flex-shrink: 0;
         }
         .header-logo img {
-            max-width: 200px;
+            max-width: 180px;
             max-height: 70px;
             object-fit: contain;
         }
 
-        /* Selector de Tarjetas */
+        /* Selector de Tarjetas - Optimizado para evitar espacio excesivo */
         #selector-tarjetas {
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; flex-grow: 1; padding-bottom: 50px;
+            justify-content: flex-start; 
+            padding-top: 20px;
+            width: 100%;
         }
         .contenedor-opciones {
-            display: flex; gap: 12px; margin-top: 20px;
+            display: flex; gap: 10px; margin-top: 15px;
         }
         .tapa-preview {
-            width: 90px; height: 180px; /* Proporción 400x800 */
-            border: 3px solid var(--white); border-radius: 12px;
+            width: 85px; height: 170px; /* Miniatura proporcional */
+            border: 2px solid var(--white); border-radius: 10px;
             cursor: pointer; transition: transform 0.2s;
             object-fit: cover;
         }
-        .tapa-preview:active { transform: scale(0.95); }
 
         /* Contenedor del Juego */
         #contenedor-juego { 
-            display: none; flex-direction: column; align-items: center; padding-bottom: 30px;
+            display: none; flex-direction: column; align-items: center; 
+            padding: 20px 0 100px 0; /* Espacio extra abajo para el botón */
+            width: 100%;
         }
         
         canvas { 
             border: 5px solid var(--white); border-radius: 20px; 
             background: #fff; touch-action: none; 
-            width: 280px; height: 560px; /* Escalado visual del 400x800 */
+            max-width: 85vw; /* Se ajusta al ancho del celular */
+            height: auto; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
         .btn-action {
             background: linear-gradient(135deg, var(--magenta), #8e54e9);
-            color: white; border: none; padding: 16px 35px; border-radius: 30px;
-            font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 20px;
+            color: white; border: none; padding: 18px 40px; border-radius: 35px;
+            font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 25px;
             text-transform: uppercase; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.4);
         }
 
-        /* Modales y Registro */
+        /* Modales */
         .overlay { 
             display: none; position: fixed; inset: 0; background: rgba(26, 11, 46, 0.98); 
             z-index: 1000; flex-direction: column; justify-content: center; align-items: center; 
@@ -92,8 +99,8 @@
     </div>
 
     <div id="selector-tarjetas">
-        <h2 style="color: var(--gold); text-shadow: 0 2px 4px rgba(0,0,0,0.5);">¡ELIGE TU TARJETA!</h2>
-        <p>Toca una para empezar a rascar</p>
+        <h2 style="color: var(--gold); margin: 0;">¡ELIGE TU TARJETA!</h2>
+        <p style="margin: 5px 0 15px 0;">Toca una para descubrir tu premio</p>
         <div class="contenedor-opciones">
             <img src="tapa1.webp" class="tapa-preview" onclick="iniciarRasca(1)">
             <img src="tapa2.webp" class="tapa-preview" onclick="iniciarRasca(2)">
@@ -102,14 +109,14 @@
     </div>
 
     <div id="contenedor-juego">
-        <p style="font-weight: bold; color: var(--gold); margin-bottom: 10px;">DESCUBRE TU PREMIO ABAJO 👇</p>
+        <p style="font-weight: bold; color: var(--gold); margin-bottom: 15px;">DESLIZA TU DEDO PARA RASCAR 👇</p>
         <canvas id="lienzo-rascar" width="400" height="800"></canvas>
         <button id="btn-reclamar" class="btn-action" style="display:none; background: var(--green);" onclick="abrirRegistro()">RECLAMAR PREMIO</button>
     </div>
 
     <div id="modal-registro" class="overlay">
         <div class="caja-blanca">
-            <h2 style="margin:0; color: #1a0b2e;">¡FELICIDADES!</h2>
+            <h2 style="margin:0; color: #1a0b2e;">¡GANASTE!</h2>
             <p id="txt-premio-ganado" style="font-weight: 900; color: #d35400; font-size: 1.3rem; margin: 15px 0;"></p>
             <input type="text" id="nombre" placeholder="Nombre completo">
             <input type="tel" id="whatsapp" placeholder="WhatsApp (10 dígitos)">
@@ -119,14 +126,14 @@
                 <label for="aviso">Acepto el <a href="javascript:void(0)" onclick="togglePriv(true)" style="color: var(--magenta);">aviso de privacidad</a>.</label>
             </div>
             
-            <button class="btn-action" style="width:100%;" onclick="enviarReclamo()">CANJEAR PREMIO</button>
+            <button class="btn-action" style="width:100%;" onclick="enviarReclamo()">CANJEAR POR WHATSAPP</button>
         </div>
     </div>
 
     <div id="modal-priv" class="overlay" style="z-index: 2000;">
         <div class="caja-blanca" style="text-align: left;">
             <h3 style="margin-top:0;">Aviso de Privacidad</h3>
-            <p style="font-size: 14px; line-height: 1.4;">Los datos recabados por <b>Artem</b> (Nombre y WhatsApp) se utilizarán solo para la entrega del premio ganado en esta dinámica. No se almacenan datos en servidores externos.</p>
+            <p style="font-size: 14px; line-height: 1.4;">Los datos recabados por <b>Artem</b> (Nombre y WhatsApp) se utilizarán solo para validar la entrega del premio. Al dar clic en enviar, se abrirá un chat directo con el comercio.</p>
             <button class="btn-action" style="width:100%;" onclick="togglePriv(false)">CERRAR</button>
         </div>
     </div>
@@ -135,7 +142,7 @@
         // SEGURIDAD: Solo abre con ?acceso=valido
         const params = new URLSearchParams(window.location.search);
         if(params.get('acceso') !== 'valido') {
-            document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>⚠️ Acceso Restringido</h2><p>Escanea el código QR en tienda para participar.</p></div>";
+            document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>⚠️ Acceso Restringido</h2><p>Escanea el código QR oficial en el establecimiento.</p></div>";
         }
 
         const premiosInfo = {
@@ -150,15 +157,13 @@
         let rascadoListo = false;
 
         function iniciarRasca(idTapa) {
-            premioId = Math.floor(Math.random() * 3) + 1; // Selección al azar del premio
+            premioId = Math.floor(Math.random() * 3) + 1;
             document.getElementById('selector-tarjetas').style.display = 'none';
             document.getElementById('contenedor-juego').style.display = 'flex';
 
-            // 1. Poner la imagen del premio al fondo del canvas
             canvas.style.backgroundImage = `url('premio${premioId}.webp')`;
             canvas.style.backgroundSize = "100% 100%";
 
-            // 2. Dibujar la tapa seleccionada encima
             const imgTapa = new Image();
             imgTapa.src = `tapa${idTapa}.webp`;
             imgTapa.onload = () => {
@@ -171,13 +176,12 @@
             const rect = canvas.getBoundingClientRect();
             const touch = e.touches ? e.touches[0] : e;
             
-            // Ajuste de coordenadas escala 400x800
             const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
             const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
 
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath();
-            ctx.arc(x, y, 35, 0, Math.PI * 2);
+            ctx.arc(x, y, 40, 0, Math.PI * 2);
             ctx.fill();
 
             validarProgreso();
@@ -185,11 +189,16 @@
 
         function validarProgreso() {
             if(rascadoListo) return;
-            // Validamos un punto central (400x800 -> 200, 400)
+            // Validar punto central para mostrar botón
             const data = ctx.getImageData(200, 400, 1, 1).data;
             if(data[3] === 0) {
                 rascadoListo = true;
-                document.getElementById('btn-reclamar').style.display = 'block';
+                const btn = document.getElementById('btn-reclamar');
+                btn.style.display = 'block';
+                // Scroll automático suave hacia el botón
+                setTimeout(() => {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
             }
         }
 
@@ -215,7 +224,7 @@
                 return;
             }
 
-            const mensaje = encodeURIComponent(`*ARTEM - RASCA Y GANA*\n\n🏆 PREMIO: ${premiosInfo[premioId]}\n👤 CLIENTE: ${nom}\n📱 TEL: ${tel}\n\nCanje solicitado desde el sitio web.`);
+            const mensaje = encodeURIComponent(`*ARTEM - RASCA Y GANA*\n\n🏆 PREMIO: ${premiosInfo[premioId]}\n👤 CLIENTE: ${nom}\n📱 TEL: ${tel}`);
             window.location.href = `https://wa.me/5215542492026?text=${mensaje}`;
         }
     </script>
