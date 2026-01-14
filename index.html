@@ -23,7 +23,7 @@
             font-family: 'Segoe UI', sans-serif; color: var(--white); 
             min-height: 100vh; 
             display: flex; flex-direction: column; align-items: center;
-            overflow-y: auto; /* Permite scroll si el canvas es muy alto */
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -41,7 +41,7 @@
             object-fit: contain;
         }
 
-        /* Selector de Tarjetas - Optimizado para evitar espacio excesivo */
+        /* Selector de Tarjetas */
         #selector-tarjetas {
             display: flex; flex-direction: column; align-items: center;
             justify-content: flex-start; 
@@ -52,7 +52,7 @@
             display: flex; gap: 10px; margin-top: 15px;
         }
         .tapa-preview {
-            width: 85px; height: 170px; /* Miniatura proporcional */
+            width: 85px; height: 170px; 
             border: 2px solid var(--white); border-radius: 10px;
             cursor: pointer; transition: transform 0.2s;
             object-fit: cover;
@@ -61,14 +61,14 @@
         /* Contenedor del Juego */
         #contenedor-juego { 
             display: none; flex-direction: column; align-items: center; 
-            padding: 20px 0 100px 0; /* Espacio extra abajo para el botón */
+            padding: 20px 0 100px 0; 
             width: 100%;
         }
         
         canvas { 
             border: 5px solid var(--white); border-radius: 20px; 
             background: #fff; touch-action: none; 
-            max-width: 85vw; /* Se ajusta al ancho del celular */
+            max-width: 85vw; 
             height: auto; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
@@ -139,12 +139,8 @@
     </div>
 
     <script>
-        // SEGURIDAD: Solo abre con ?acceso=valido
-        const params = new URLSearchParams(window.location.search);
-        if(params.get('acceso') !== 'valido') {
-            document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>⚠️ Acceso Restringido</h2><p>Escanea el código QR oficial en el establecimiento.</p></div>";
-        }
-
+        // SE ELIMINÓ EL BLOQUE DE SEGURIDAD DEL QR
+        
         const premiosInfo = {
             1: "10% DE DESCUENTO ETIQUETA ROJA",
             2: "50% DE DESCUENTO ETIQUETA AMARILLA",
@@ -189,13 +185,11 @@
 
         function validarProgreso() {
             if(rascadoListo) return;
-            // Validar punto central para mostrar botón
             const data = ctx.getImageData(200, 400, 1, 1).data;
             if(data[3] === 0) {
                 rascadoListo = true;
                 const btn = document.getElementById('btn-reclamar');
                 btn.style.display = 'block';
-                // Scroll automático suave hacia el botón
                 setTimeout(() => {
                     btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 300);
